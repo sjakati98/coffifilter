@@ -1,0 +1,16 @@
+{
+  "_checkout": null,
+  "_output_dir": "/Users/shishir",
+  "_repo_dir": "/Users/shishir/.cookiecutters/cookiecutter-hypermodern-python",
+  "_template": "gh:cjolowicz/cookiecutter-hypermodern-python",
+  "author": "Shishir Jakati",
+  "copyright_year": "2024",
+  "development_status": "Development Status :: 2 - Pre-Alpha",
+  "email": "shishir.jakati98@gmail.com",
+  "friendly_name": "CoffiFilter",
+  "github_user": "sjakati98",
+  "license": "GPL-3.0",
+  "package_name": "coffifilter",
+  "project_name": "coffifilter",
+  "version": "0.0.0"
+}
