@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "coffifilter"
-version = "0.0.0"
+version = "0.0.1"
 description = "CoffiFilter"
 authors = ["Shishir Jakati <shishir.jakati98@gmail.com>"]
 license = "GPL-3.0"
