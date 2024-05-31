@@ -1,5 +1,6 @@
 # pylint: disable=invalid-name
 import redis  # type: ignore
+from .helpers import singleton
 
 
 @singleton
