@@ -1,11 +1,12 @@
 # CoffiFilter
 
+☕️ CoffiFilter is a tool to help manage your LLM agents' outbound tool usage.
+
 [![PyPI](https://img.shields.io/pypi/v/coffifilter.svg)][pypi status]
 [![Status](https://img.shields.io/pypi/status/coffifilter.svg)][pypi status]
 [![Python Version](https://img.shields.io/pypi/pyversions/coffifilter)][pypi status]
 [![License](https://img.shields.io/pypi/l/coffifilter)][license]
 
-[![Read the documentation at https://coffifilter.readthedocs.io/](https://img.shields.io/readthedocs/coffifilter/latest.svg?label=Read%20the%20Docs)][read the docs]
 [![Tests](https://github.com/sjakati98/coffifilter/workflows/Tests/badge.svg)][tests]
 [![Codecov](https://codecov.io/gh/sjakati98/coffifilter/branch/main/graph/badge.svg)][codecov]
 
@@ -19,13 +20,21 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
+## What is CoffiFilter?
+
+- A tool to help manage your LLM agents' outbound tool usage.
+- Track and manage the tools that your agents are using.
+- Switch tools on and off for your agents without having to redeploy them.
+
 ## Features
 
-- TODO
+- Connect to your own redis server.
+- Drop in decorator for langchain functions.
 
 ## Requirements
 
-- TODO
+- Python 3.6 or later
+- Redis server
 
 ## Installation
 
@@ -37,7 +46,51 @@ $ pip install coffifilter
 
 ## Usage
 
-Please see the [Command-line Reference] for details.
+CoffiFilter can be used as a decorator for your langchain functions.
+
+```python
+import coffifilter
+
+coffifilter.init(
+    redis_host="your-redishost.redis-cloud.com",
+    redis_port=11552,
+    redis_db=0,
+    redis_password="your-redispassword",
+)
+
+@tool
+@coffifilter.coffi_filter("summarize_tool")
+def summarize_tool(url: str, callbacks: Callbacks = None):
+    """Summarize a website."""
+    text = requests.get(url).text
+    summary_chain = (
+        ChatPromptTemplate.from_template(
+            "Summarize the following text:\n<TEXT {uid}>\n" "{text}" "\n</TEXT {uid}>"
+        ).partial(uid=lambda: uuid.uuid4())
+        | ChatOpenAI(model="gpt-4o")
+        | StrOutputParser()
+    ).with_config(run_name="Summarize Text")
+    return summary_chain.invoke(
+        {"text": text},
+        {"callbacks": callbacks},
+    )
+```
+
+The current design of the decorator is to check the redis server for the tool status before executing the function. It literally checks if the tool is on or off by checking the value of the key in the redis server. If the key is not found, it will default to off. If the key is found, it will check if the value is "true" or "false".
+
+The decorator will raise a ValueError if the tool is off.
+
+Eg. If the tool is off, the following error will be raised:
+```python
+ValueError(f"Tool '{filter_string}' is not enabled")
+```
+
+## Coming Soon
+
+- Better langchain integration.
+- Better error handling.
+- Local first approach; avoiding redis server if not needed.
+- User tracking and IFTTT tool usage.
 
 ## Contributing
 
@@ -54,7 +107,7 @@ _CoffiFilter_ is free and open source software.
 If you encounter any problems,
 please [file an issue] along with a detailed description.
 
-## Credits
+### Credits
 
 This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter] template.
 
