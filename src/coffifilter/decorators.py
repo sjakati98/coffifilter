@@ -17,6 +17,9 @@ def coffi_filter(filter_string: str):
         callable: The decorated function.
     """
 
+    # Add the function to the Redis database
+    Client()._add_function_to_redis(filter_string)
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):

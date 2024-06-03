@@ -24,10 +24,28 @@ class Client:
         redis_db=0,
         redis_password=None,
     ):
-        self.redis_host = redis_host
-        self.redis_port = redis_port
-        self.redis_db = redis_db
-        self.redis_password = redis_password
+        self.r = redis.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            password=redis_password,
+        )
+
+    def _add_function_to_redis(self, filter_string, enabled=True) -> None:
+        """
+        Add a function to the Redis database.
+
+        Args:
+            filter_string (str): The name of the function to add.
+            enabled (bool): Whether the function is enabled or not.
+        """
+
+        # check if the key already exists in the redis database
+        if not self.r.exists(filter_string):
+            # convert the enabled flag to a string
+            enabled = str(enabled)
+            # Set the value in the Redis database
+            self.r.set(filter_string, enabled)
 
     def _check_tool_enabled(self, filter_string) -> None:
         """
@@ -40,13 +58,11 @@ class Client:
             ValueError: If the tool is not enabled.
         """
         # Get the value associated with the filter string from the Redis database
-        value = self.get_value_from_redis(
-            filter_string,
-            self.redis_host,
-            self.redis_port,
-            self.redis_db,
-            self.redis_password,
-        )
+        value = self.get_value_from_redis(filter_string)
+
+        # if the value is not present in the redis database, return
+        if value is None:
+            return
 
         # Convert the value to a boolean
         enabled = self.str_to_bool(value)
@@ -55,8 +71,7 @@ class Client:
         if not enabled:
             raise ValueError(f"Tool '{filter_string}' is not enabled")
 
-    @staticmethod
-    def get_value_from_redis(key, host="localhost", port=6379, db=0, password=None):
+    def get_value_from_redis(self, key):
         """
         Retrieves the value associated with the given key from a Redis database.
 
@@ -70,13 +85,10 @@ class Client:
         Returns:
             str or None: The value associated with the given key, or None if the key is not found.
         """
-        # Create a Redis connection
-        r = redis.Redis(host=host, port=port, db=db, password=password)
-
         # Check if the key exists
-        if r.exists(key):
+        if self.r.exists(key):
             # Get the value associated with the key
-            value = r.get(key)
+            value = self.r.get(key)
 
             # Decode the value from bytes to string
             value = value.decode("utf-8")
