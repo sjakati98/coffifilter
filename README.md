@@ -46,7 +46,32 @@ $ pip install coffifilter
 
 ## Usage
 
-CoffiFilter can be used as a decorator for your langchain functions.
+CoffiFilter can wrap your Langchain tools to help manage their usage.
+
+```python
+import coffifilter
+from langchain_community.tools import YouTubeSearchTool
+
+coffifilter.init(
+    redis_host="your-redishost.redis-cloud.com",
+    redis_port=11552,
+    redis_db=0,
+    redis_password="your-redispassword",
+)
+
+youtube_tool = coffifilter.wrap_langchain_tool(YouTubeSearchTool())
+
+...
+
+tools = [..., youtube_tool]
+
+# Create an agent executor by passing in the agent and tools
+agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+agent_executor.invoke({"input": "can you find videos on langchain"})
+```
+
+
+CoffiFilter can also be used as a decorator for your langchain functions.
 
 ```python
 import coffifilter
@@ -76,7 +101,7 @@ def summarize_tool(url: str, callbacks: Callbacks = None):
     )
 ```
 
-The current design of the decorator is to check the redis server for the tool status before executing the function. It literally checks if the tool is on or off by checking the value of the key in the redis server. If the key is not found, it will default to off. If the key is found, it will check if the value is "true" or "false".
+The current design is to check the redis server for the tool status before executing the function. It literally checks if the tool is on or off by checking the value of the key in the redis server. If the key is not found, it will default to off. If the key is found, it will check if the value is "true" or "false".
 
 The decorator will raise a ValueError if the tool is off.
 
@@ -87,6 +112,7 @@ ValueError(f"Tool '{filter_string}' is not enabled")
 
 ## Coming Soon
 
+- Better documentation.
 - Better langchain integration.
 - Better error handling.
 - Local first approach; avoiding redis server if not needed.

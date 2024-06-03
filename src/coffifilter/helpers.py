@@ -9,4 +9,12 @@ def singleton(class_):
             instances[class_] = class_(*args, **kwargs)
         return instances[class_]
 
+    def reset():
+        """
+        Reset the singleton instance.
+        """
+        instances.clear()
+
+    class_.reset = reset
+    getinstance.reset = reset
     return getinstance

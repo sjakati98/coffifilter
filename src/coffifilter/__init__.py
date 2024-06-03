@@ -2,6 +2,7 @@
 
 from .client import Client
 from .decorators import coffi_filter
+from .wrappers import wrap_langchain_tool
 
 
 def init(
@@ -25,6 +26,9 @@ def init(
         Client: The client object for the CoffiFilter service.
 
     """
+
+    # Reset the singleton instance before creating a new one
+    Client.reset()
 
     return Client(
         redis_host=redis_host,
